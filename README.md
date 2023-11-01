@@ -1,4 +1,4 @@
-# USA_Insurance
+# United States Insurance Visualization & Analysis
 STAT 451 Final Project on United States Insurance
 Authors: David Ye & Kreslyn Hinds
 

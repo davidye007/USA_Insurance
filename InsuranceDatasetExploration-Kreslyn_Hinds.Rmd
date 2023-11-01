@@ -1,0 +1,65 @@
+---
+title: "InsuranceDatasetExploration-Kreslyn_Hinds"
+author: "Kreslyn Hinds"
+date: '`r Sys.Date()`'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(tidyverse)
+
+```
+
+```{r defining_variables}
+Data = read_csv("https://raw.githubusercontent.com/davidye007/USA_Insurance/main/US_Insurance_Dataset.csv")
+Base_data = Data %>%
+  mutate(Percent_Decimal = Percentage * 0.01)
+# Classifing Red vs Blue vs Neither: https://www.270towin.com/same-since-electoral-maps/
+# Voted the same since 2000
+Blue_states = c("Washington", "Oregon", "California", "Minnesota", "Illinois", "New York", "Vermont", "Maine", "Massachussetts", "Rhode Island", "Conneticut", "New Jersey", "Delaware", "Maryland", "District of Columbia", "Hawaii")
+Red_states = c("Idaho", "Montana", "Wyoming", "Utah", "North Dakota", "South Dakota", "Nebraska", "Kansas", "Oklahoma", "Texas", "Missouri", "Arkansas", "Louisiana", "Mississippi", "Alabama", "South Carolina", "Tennessee", "Kentucky", "West Virginia", "Alaska")
+Not_consistent = c("Nevada", "Arizona", "Colorado", "New Mexico", "Iowa", "Wisconsin", "Michigan", "Indiana", "Ohio", "Pennsylvania", "New Hampshire", "Virginia", "North Carolina", "Georgia", "Florida")
+
+```
+
+
+
+
+
+
+```{r data_cleaning}
+df_political_affiliation = Base_data %>%
+  mutate(Political_Affiliation = case_when(State %in% Blue_states ~ "Democratic State",
+                            State %in% Red_states ~ "Republican State",
+                            State %in% Not_consistent ~ "Did Not Vote Consistantly Democratic or Republican",
+                            TRUE ~ "Not a State"
+  ))
+df_Blue_states = df_political_affiliation %>%
+  filter(Political_Affiliation == "Democratic State") %>%
+  group_by(Year, InsuranceType)%>% 
+  summarise(average_percent = mean(Percent_Decimal))
+```
+
+```{r plotting}
+### When we have a shiny dash board we can toggle from Blue -> Red -> Neither
+### Add a check on/off for each state to pick and choose on a line graph?
+ggplot(df_Blue_states, aes(x=Year, y=average_percent, color =InsuranceType)) +
+geom_line()+
+  
+  ggtitle("Insurance Enrollment For Blue States")+
+xlab("Year") +
+ylab("Percentage") +
+theme(plot.title = element_text(size=12, hjust = 0.5, color="grey25"),
+      axis.title.x=element_text(size=10, color="gray25"),
+      axis.text.x=element_text(angle = 40),
+      legend.title=element_text(size=8, color="grey25", hjust = 0.5),
+      legend.text=element_text(size=8, color="grey25",),
+      legend.key.size=unit(0.4, units = "cm"),
+      legend.justification = c("right", "top"),
+      axis.title.y=element_text(size=10, color="gray25", ),
+      aspect.ratio=0.9,
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank()) 
+```

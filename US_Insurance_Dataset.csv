@@ -1,4 +1,4 @@
-﻿State/Region,Year,Insurance Type,Population,Percentage
+﻿State,Year,InsuranceType,Population,Percentage
 United States,2022,Total,76740,100
 United States,2022,Any Coverage,72810,94.9
 United States,2022,Uninsured,3932,5.1

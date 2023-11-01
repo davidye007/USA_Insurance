@@ -1,0 +1,33 @@
+---
+title: "InsuranceDatasetExploration"
+author: "David Ye"
+date: '`r Sys.Date()`'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+
+
+```
+
+```{r}
+Insur_df <- read_csv("https://raw.githubusercontent.com/davidye007/USA_Insurance/main/US_Insurance_Dataset.csv")
+
+```
+
+```{r}
+library(ggplot2)
+
+# Filter the data first
+filtered_data <- subset(Insur_df, State == "United States")
+
+# Create the ggplot object using the filtered data
+ggplot(filtered_data, aes(x = Year, y = Percentage, color = InsuranceType)) +
+  geom_point(size = 3) +
+  labs(x = "Year", y = "Total", title = "Scatterplot of Total by Year") +
+  theme_minimal()
+
+
+```

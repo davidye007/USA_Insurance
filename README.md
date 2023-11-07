@@ -6,11 +6,11 @@ Dataset #1:
 [Insurance Dataset from the U.S. Census Bureau](https://www2.census.gov/programs-surveys/demo/tables/health-insurance/time-series/acs/hic05_acs.xlsx)
 
 Question(s):
-1) How does heath insurance enrollment vary by state and year?
+1) How does heath insurance enrollment vary by state?
 
 2) Does heath insurance enrollment rate and main insurance type change based on a state's political affiliation?
 
-3) Does heath insurance enrollment correlate to recessions?
+3) Does healthcare enrollment change with presidential shifts?
 
 Data set explanations for each column:
 

@@ -9,19 +9,26 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 library(readr)
 library(tidyverse)
+library(scales)
+library(RColorBrewer)
 
 ```
 
 ```{r defining_variables}
 Data = read_csv("https://raw.githubusercontent.com/davidye007/USA_Insurance/main/US_Insurance_Dataset.csv")
 Base_data = Data %>%
-  mutate(Percent_Decimal = Percentage * 0.01)
-# Classifing Red vs Blue vs Neither: https://www.270towin.com/same-since-electoral-maps/
+  filter(InsuranceType != "Total") %>%
+  filter(InsuranceType != "Any Coverage") %>%
+  mutate(Percent = ifelse(is.na(Percentage), 0, Percentage)) %>%
+  mutate(Percent_Decimal = Percent * 0.01) %>%
+  mutate(Population_expanded = Population * 1000)
+  
+  
+# Classifying Red vs Blue vs Neither: https://www.270towin.com/same-since-electoral-maps/
 # Voted the same since 2000
 Blue_states = c("Washington", "Oregon", "California", "Minnesota", "Illinois", "New York", "Vermont", "Maine", "Massachussetts", "Rhode Island", "Conneticut", "New Jersey", "Delaware", "Maryland", "District of Columbia", "Hawaii")
 Red_states = c("Idaho", "Montana", "Wyoming", "Utah", "North Dakota", "South Dakota", "Nebraska", "Kansas", "Oklahoma", "Texas", "Missouri", "Arkansas", "Louisiana", "Mississippi", "Alabama", "South Carolina", "Tennessee", "Kentucky", "West Virginia", "Alaska")
 Not_consistent = c("Nevada", "Arizona", "Colorado", "New Mexico", "Iowa", "Wisconsin", "Michigan", "Indiana", "Ohio", "Pennsylvania", "New Hampshire", "Virginia", "North Carolina", "Georgia", "Florida")
-
 ```
 
 
@@ -31,26 +38,29 @@ Not_consistent = c("Nevada", "Arizona", "Colorado", "New Mexico", "Iowa", "Wisco
 
 ```{r data_cleaning}
 df_political_affiliation = Base_data %>%
+  filter(InsuranceType == "Medicare") %>%
   mutate(Political_Affiliation = case_when(State %in% Blue_states ~ "Democratic State",
                             State %in% Red_states ~ "Republican State",
                             State %in% Not_consistent ~ "Did Not Vote Consistantly Democratic or Republican",
-                            TRUE ~ "Not a State"
-  ))
-df_Blue_states = df_political_affiliation %>%
-  filter(Political_Affiliation == "Democratic State") %>%
-  group_by(Year, InsuranceType)%>% 
-  summarise(average_percent = mean(Percent_Decimal))
+                            TRUE ~ "Not a State")) %>%
+  filter(Political_Affiliation != "Not a State")%>%
+  group_by(Political_Affiliation, Year, InsuranceType)%>% 
+  summarise(average_percent = mean(Percent_Decimal))                          
+
+df_washington = Base_data  %>%
+  filter(State == "Washington")
 ```
 
-```{r plotting}
+```{r political plots}
 ### When we have a shiny dash board we can toggle from Blue -> Red -> Neither
 ### Add a check on/off for each state to pick and choose on a line graph?
-ggplot(df_Blue_states, aes(x=Year, y=average_percent, color =InsuranceType)) +
+ggplot(df_political_affiliation, aes(x=Year, y=average_percent, color =Political_Affiliation)) +
 geom_line()+
-  
-  ggtitle("Insurance Enrollment For Blue States")+
+scale_color_manual(values=c("blue", "grey1", "red"))+
+ggtitle("Medicare Insurance Enrollment By Political Affiliation", subtitle = "*Part 2: Using Shinny We Can Toggle Through Different Insurance Types*")+
 xlab("Year") +
 ylab("Percentage") +
+# scale_y_continuous(trans='log10')+
 theme(plot.title = element_text(size=12, hjust = 0.5, color="grey25"),
       axis.title.x=element_text(size=10, color="gray25"),
       axis.text.x=element_text(angle = 40),
@@ -62,4 +72,29 @@ theme(plot.title = element_text(size=12, hjust = 0.5, color="grey25"),
       aspect.ratio=0.9,
       panel.grid.major=element_blank(),
       panel.grid.minor=element_blank()) 
+ggsave("Graph(1).png", device="png")
+
+```
+
+```{r state plot}
+ggplot(df_washington, aes(x=Year, y=Percent, color = InsuranceType))+
+geom_line()+
+scale_y_continuous(trans='log10')+
+scale_colour_brewer(palette = "Set1")+
+ggtitle("Insurance Enrollment For Washington", 
+        subtitle = "*Part 2: Use Shinny to Select or Toggle Through Different States*")+
+xlab("Year")+
+ylab("Number of People (log10 scale)") +
+theme(plot.title = element_text(size=12, hjust = 0.5, color="grey25"),
+      axis.title.x=element_text(size=10, color="gray25"),
+      axis.text.x=element_text(angle = 40),
+      legend.title=element_text(size=8, color="grey25", hjust = 0.5),
+      legend.text=element_text(size=8, color="grey25",),
+      legend.key.size=unit(0.4, units = "cm"),
+      legend.justification = c("right", "top"),
+      axis.title.y=element_text(size=10, color="gray25", ),
+      aspect.ratio=0.9,
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank()) 
+ggsave("Graph(2).png", device="png")
 ```

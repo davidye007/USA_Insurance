@@ -1,0 +1,147 @@
+---
+title: "Health Insurance in the United States"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+---
+
+# Questions to Explore: {.sidebar}
+
+1. How does heath insurance enrollment vary by state?
+
+2. Does heath insurance enrollment rate and main insurance type change based on a state's political affiliation?
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(cache = TRUE)
+library(readr)
+library(tidyverse)
+library(scales)
+library(RColorBrewer)
+```
+
+
+```{r}
+
+knitr::opts_chunk$set(cache = TRUE)
+
+library(dplyr)
+library(highcharter)
+library(viridisLite)
+library(ggplot2)
+data(uscountygeojson)
+
+
+thm <- 
+  hc_theme(
+    colors = c("#1a6ecc", "#434348", "#90ed7d"),
+    chart = list(
+      backgroundColor = "transparent",
+      style = list(fontFamily = "Source Sans Pro")
+    ),
+    xAxis = list(
+      gridLineWidth = 1
+    )
+  )
+
+data("USArrests", package = "datasets")
+data("usgeojson")
+
+Data = read_csv("https://raw.githubusercontent.com/davidye007/USA_Insurance/main/US_Insurance_Dataset.csv")
+Base_data = Data %>%
+  filter(InsuranceType != "Total") %>%
+  filter(InsuranceType != "Any Coverage") %>%
+  mutate(Percent = ifelse(is.na(Percentage), 0, Percentage)) %>%
+  mutate(Percent_Decimal = Percent * 0.01) %>%
+  mutate(Population_expanded = Population * 1000)
+
+Blue_states = c("Washington", "Oregon", "California", "Minnesota", "Illinois", "New York", "Vermont", "Maine", "Massachussetts", "Rhode Island", "Conneticut", "New Jersey", "Delaware", "Maryland", "District of Columbia", "Hawaii")
+Red_states = c("Idaho", "Montana", "Wyoming", "Utah", "North Dakota", "South Dakota", "Nebraska", "Kansas", "Oklahoma", "Texas", "Missouri", "Arkansas", "Louisiana", "Mississippi", "Alabama", "South Carolina", "Tennessee", "Kentucky", "West Virginia", "Alaska")
+Not_consistent = c("Nevada", "Arizona", "Colorado", "New Mexico", "Iowa", "Wisconsin", "Michigan", "Indiana", "Ohio", "Pennsylvania", "New Hampshire", "Virginia", "North Carolina", "Georgia", "Florida")
+```
+
+```{r data_cleaning}
+df_political_affiliation = Base_data %>%
+  filter(InsuranceType == "Medicare") %>%
+  mutate(Political_Affiliation = case_when(State %in% Blue_states ~ "Democratic State",
+                            State %in% Red_states ~ "Republican State",
+                            State %in% Not_consistent ~ "Did Not Vote Consistantly Democratic or Republican",
+                            TRUE ~ "Not a State")) %>%
+  filter(Political_Affiliation != "Not a State")%>%
+  group_by(Political_Affiliation, Year, InsuranceType)%>% 
+  summarise(average_percent = mean(Percent_Decimal))                          
+
+df_washington = Base_data  %>%
+  filter(State == "Washington")
+```
+
+# Page 1 {data-icon="fa.list"}
+
+## Column {.tabset .tabset-fade data-height="650"}
+
+### htmlwidgets {data-width="300"}
+
+```{r}
+### Will make plot dynamic eventually
+Base_Data_filtered <- Base_data %>% filter(InsuranceType == "Uninsured", Year == 2022, State != "United States")
+
+highchart() %>%
+  hc_add_series_map(usgeojson, Base_Data_filtered, name = "Percent of State Uninsured in 2022", value = "Percentage", joinBy = c("woename", "State")) %>%
+  hc_mapNavigation(enabled = TRUE) %>%
+  hc_add_theme(thm)
+```
+
+## Column {data-height="350"}
+
+### ggplot2 Plots
+
+
+```{r}
+ggplot(df_political_affiliation, aes(x=Year, y=average_percent, color =Political_Affiliation)) +
+geom_line()+
+scale_color_manual(values=c("blue", "grey1", "red"))+
+ggtitle("Medicare Insurance Enrollment By Political Affiliation", subtitle = "*Part 2: Using Shinny We Can Toggle Through Different Insurance Types*")+
+xlab("Year") +
+ylab("Percentage") +
+# scale_y_continuous(trans='log10')+
+theme(plot.title = element_text(size=12, hjust = 0.5, color="grey25"),
+      axis.title.x=element_text(size=10, color="gray25"),
+      axis.text.x=element_text(angle = 40),
+      legend.title=element_text(size=8, color="grey25", hjust = 0.5),
+      legend.text=element_text(size=8, color="grey25",),
+      legend.key.size=unit(0.4, units = "cm"),
+      legend.justification = c("right", "top"),
+      axis.title.y=element_text(size=10, color="gray25", ),
+      #aspect.ratio=0.9,
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank()) 
+```
+
+## Column {data-height="350"}
+
+### ggplot2 Plots
+```{r}
+ggplot(df_washington, aes(x=Year, y=Percent, color = InsuranceType))+
+geom_line()+
+scale_y_continuous(trans='log10')+
+scale_colour_brewer(palette = "Set1")+
+ggtitle("Insurance Enrollment For Washington", 
+        subtitle = "*Part 2: Use Shinny to Select or Toggle Through Different States*")+
+xlab("Year")+
+ylab("Number of People (log10 scale)") +
+theme(plot.title = element_text(size=12, hjust = 0.5, color="grey25"),
+      axis.title.x=element_text(size=10, color="gray25"),
+      axis.text.x=element_text(angle = 40),
+      legend.title=element_text(size=8, color="grey25", hjust = 0.5),
+      legend.text=element_text(size=8, color="grey25",),
+      legend.key.size=unit(0.4, units = "cm"),
+      legend.justification = c("right", "top"),
+      axis.title.y=element_text(size=10, color="gray25", ),
+      #aspect.ratio=0.9,
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank())
+```
+
+
+

@@ -11,8 +11,6 @@ Question(s):
 
 2) Does heath insurance enrollment rate and main insurance type change based on a state's political affiliation?
 
-3) Does healthcare enrollment change with presidential shifts?
-
 Data set explanations for each column:
 
 State: All 50 states in the United States, plus United States (representing the whole of the U.S.), and the District of Columbia.

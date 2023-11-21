@@ -159,10 +159,20 @@ Row {.tabset .tabset-fade}
 ```{r, cache=FALSE}
 
 renderPlot({
+  df_political_affiliation = Base_data %>%
+  filter(InsuranceType == input$insur_type) %>%
+  mutate(Political_Affiliation = case_when(State %in% Blue_states ~ "Democratic State",
+                            State %in% Red_states ~ "Republican State",
+                            State %in% Not_consistent ~ "Did Not Vote Consistantly Democratic or Republican",
+                            TRUE ~ "Not a State")) %>%
+  filter(Political_Affiliation != "Not a State")%>%
+  group_by(Political_Affiliation, Year, InsuranceType)%>% 
+  summarise(average_percent = mean(Percent_Decimal))
+  
   ggplot(df_political_affiliation, aes(x=Year, y=average_percent, color =Political_Affiliation)) +
   geom_line()+
   scale_color_manual(values=c("blue", "grey1", "red"))+
-  ggtitle("Medicare Insurance Enrollment By Political Affiliation", subtitle = "*Part 2: Using Shinny We Can Toggle Through Different Insurance Types*")+
+  ggtitle(paste(input$insur_type, "Insurance Enrollment By Political Affiliation"))+
   xlab("Year") +
   ylab("Percentage") +
   # scale_y_continuous(trans='log10')+
@@ -177,17 +187,29 @@ renderPlot({
         #aspect.ratio=0.9,
         panel.grid.major=element_blank(),
         panel.grid.minor=element_blank())
+  
 })
 ```
 
 ### Political Affiliation
 
 ```{r, cache=FALSE}
+
 renderPlot({
+  df_political_affiliation = Base_data %>%
+  filter(InsuranceType == input$insur_type) %>%
+  mutate(Political_Affiliation = case_when(State %in% Blue_states ~ "Democratic State",
+                            State %in% Red_states ~ "Republican State",
+                            State %in% Not_consistent ~ "Did Not Vote Consistantly Democratic or Republican",
+                            TRUE ~ "Not a State")) %>%
+  filter(Political_Affiliation != "Not a State")%>%
+  group_by(Political_Affiliation, Year, InsuranceType)%>% 
+  summarise(average_percent = mean(Percent_Decimal))
+  
   ggplot(df_political_affiliation, aes(x=Year, y=average_percent, color =Political_Affiliation)) +
   geom_line()+
   scale_color_manual(values=c("blue", "grey1", "red"))+
-  ggtitle("Medicare Insurance Enrollment By Political Affiliation", subtitle = "*Part 2: Using Shinny We Can Toggle Through Different Insurance Types*")+
+  ggtitle(paste(input$insur_type, "Insurance Enrollment By Political Affiliation"))+
   xlab("Year") +
   ylab("Percentage") +
   # scale_y_continuous(trans='log10')+

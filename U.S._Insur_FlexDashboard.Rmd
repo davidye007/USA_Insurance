@@ -1,0 +1,254 @@
+---
+title: "Health Insurance in the United States"
+output: 
+  flexdashboard::flex_dashboard:
+    theme:
+      version: 4
+      bootswatch: slate
+    orientation: rows
+    social: menu
+runtime: shiny
+---
+
+
+
+# Questions to Explore: {.sidebar}
+-------------------------------------
+
+1. How does heath insurance enrollment vary by state?
+
+2. Does heath insurance enrollment rate and main insurance type change based on a state's political affiliation?
+
+```{r}
+selectInput("year", label = "Year:",
+            choices = seq(2008, 2022, 1), selected = 2022)
+
+selectInput("insur_type", label = "Insurance:",
+            choices = c("Private", "Employer-based", "Direct-purchase", "TRICARE", "Public", "Medicaid", "Medicare", "VA_Care"), selected = "Employer-based")
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(cache = TRUE)
+library(readr)
+library(tidyverse)
+library(scales)
+library(RColorBrewer)
+library(dplyr)
+library(highcharter)
+library(viridisLite)
+library(ggplot2)
+```
+
+
+```{r}
+
+knitr::opts_chunk$set(cache = TRUE)
+
+
+data(uscountygeojson)
+
+
+thm <- 
+  hc_theme(
+    colors = c("#1a6ecc", "white", "#90ed7d"),
+    chart = list(
+      backgroundColor = "transparent",
+      style = list(fontFamily = "Helvetica")
+    ),
+    xAxis = list(
+      gridLineWidth = 1
+    )
+  )
+
+data("USArrests", package = "datasets")
+data("usgeojson")
+
+Data = read_csv("https://raw.githubusercontent.com/davidye007/USA_Insurance/main/US_Insurance_Dataset.csv")
+Base_data = Data %>%
+  filter(InsuranceType != "Total") %>%
+  filter(InsuranceType != "Any Coverage") %>%
+  mutate(Percent = ifelse(is.na(Percentage), 0, Percentage)) %>%
+  mutate(Percent_Decimal = Percent * 0.01) %>%
+  mutate(Population_expanded = Population * 1000)
+
+Blue_states = c("Washington", "Oregon", "California", "Minnesota", "Illinois", "New York", "Vermont", "Maine", "Massachussetts", "Rhode Island", "Conneticut", "New Jersey", "Delaware", "Maryland", "District of Columbia", "Hawaii")
+Red_states = c("Idaho", "Montana", "Wyoming", "Utah", "North Dakota", "South Dakota", "Nebraska", "Kansas", "Oklahoma", "Texas", "Missouri", "Arkansas", "Louisiana", "Mississippi", "Alabama", "South Carolina", "Tennessee", "Kentucky", "West Virginia", "Alaska")
+Not_consistent = c("Nevada", "Arizona", "Colorado", "New Mexico", "Iowa", "Wisconsin", "Michigan", "Indiana", "Ohio", "Pennsylvania", "New Hampshire", "Virginia", "North Carolina", "Georgia", "Florida")
+```
+
+```{r data_cleaning}
+df_political_affiliation = Base_data %>%
+  filter(InsuranceType == "Medicare") %>%
+  mutate(Political_Affiliation = case_when(State %in% Blue_states ~ "Democratic State",
+                            State %in% Red_states ~ "Republican State",
+                            State %in% Not_consistent ~ "Did Not Vote Consistantly Democratic or Republican",
+                            TRUE ~ "Not a State")) %>%
+  filter(Political_Affiliation != "Not a State")%>%
+  group_by(Political_Affiliation, Year, InsuranceType)%>% 
+  summarise(average_percent = mean(Percent_Decimal))                          
+
+df_washington = Base_data  %>%
+  filter(State == "Washington")
+```
+
+Row
+-------------------------------------
+
+### U.S Map
+
+```{r, cache=FALSE}
+renderHighchart({
+  
+  selectedState <- reactiveVal("Washington")  # Reactive value to store the selected state
+  ### Will make plot dynamic eventually
+  Base_Data_filtered <- Base_data %>% filter(InsuranceType == input$insur_type, Year == input$year, State != "United States")
+  
+  highchart() %>%
+    hc_add_series_map(usgeojson, Base_Data_filtered, name = "Percent of State: ", value = "Percentage", joinBy = c("woename", "State")) %>%
+    hc_mapNavigation(enabled = TRUE) %>%
+    hc_add_theme(thm) %>%
+    hc_title(text = paste(input$insur_type, "Insurance in ", input$year), style = list(color = "white")) %>%
+    hc_plotOptions(
+      series = list(
+        events = list(
+          click = JS("function(event) { Shiny.onInputChange('selected_state', event.point.name); }")
+        )
+      )
+    )
+})
+```
+
+### Line Plot of Insurance Type
+
+```{r}
+observe({
+  print(input$selected_state)  # This will print the selected year in the R console
+})
+
+```
+
+
+```{r, cache=FALSE}
+renderPlot({
+  filtered_data <- Base_data %>% 
+    filter(State == ifelse(is.null(input$selected_state), "Washington", input$selected_state))
+  
+  sel_state <- ifelse(is.null(input$selected_state), "Washington", input$selected_state)
+  
+  ggplot(filtered_data, aes(x=Year, y=Percent, color = InsuranceType))+
+  geom_line()+
+  scale_y_continuous(trans='log10')+
+  scale_colour_brewer(palette = "Set1")+
+  ggtitle(paste("Insurance Enrollment For", sel_state))+
+  xlab("Year")+
+  ylab("Number of People (log10 scale)") +
+  theme(plot.title = element_text(size=18, hjust = 0.5, color="white"),
+        axis.title.x=element_text(size=14, color="white"),
+        axis.text.x = element_text(size = 12, color = "white"),
+        axis.text.y = element_text(size = 12, color = "white"),
+        legend.title=element_text(size=14, color="white", hjust = 0.5),
+        legend.text=element_text(size=12, color="white",),
+        legend.key.size=unit(0.4, units = "cm"),
+        legend.justification = c("right", "top"),
+        legend.background = element_rect(fill = "#23272b"),  # Set legend background to black
+        legend.key = element_rect(fill = "#23272b", color = "#23272b"),  # Set legend key background and border color to black
+        axis.title.y=element_text(size=14, color="white"),
+        panel.grid.major = element_line(color= alpha("white", 1)),  # Set major gridlines to black
+        panel.grid.minor = element_line(color=alpha("white", 1)),  # Remove minor gridlines
+        panel.background = element_rect(fill="#23272b"),  # Set background color to grey
+        plot.background = element_rect(fill = "#23272b",color = "#23272b"),  # Set the entire plot background to black
+        text = element_text(family = "Helvetica")
+    )
+})
+```
+
+Row {.tabset .tabset-fade}
+-------------------------------------
+### Political Affiliation
+
+```{r, cache=FALSE}
+
+renderPlot({
+  df_political_affiliation = Base_data %>%
+  filter(InsuranceType == input$insur_type) %>%
+  mutate(Political_Affiliation = case_when(State %in% Blue_states ~ "Democratic State",
+                            State %in% Red_states ~ "Republican State",
+                            State %in% Not_consistent ~ "Inconsistant State",
+                            TRUE ~ "Not a State")) %>%
+  filter(Political_Affiliation != "Not a State")%>%
+  group_by(Political_Affiliation, Year, InsuranceType)%>% 
+  summarise(average_percent = mean(Percent_Decimal))
+  
+  ggplot(df_political_affiliation, aes(x=Year, y=average_percent, color =Political_Affiliation)) +
+  geom_line()+
+  scale_color_manual(values=c("blue", "white", "red"))+
+  ggtitle(paste(input$insur_type, "Insurance Enrollment By Political Affiliation"))+
+  xlab("Year") +
+  ylab("Percentage") +
+  # scale_y_continuous(trans='log10')+
+  theme(plot.title = element_text(size=18, hjust = 0.5, color="white"),
+        axis.title.x=element_text(size=14, color="white"),
+        axis.text.x = element_text(size = 12, color = "white"),
+        axis.text.y = element_text(size = 12, color = "white"),
+        legend.title=element_text(size=14, color="white", hjust = 0.5),
+        legend.text=element_text(size=12, color="white",),
+        legend.key.size=unit(0.4, units = "cm"),
+        legend.justification = c("right", "top"),
+        legend.background = element_rect(fill = "#23272b"),  # Set legend background to black
+        legend.key = element_rect(fill = "#23272b", color = "#23272b"),  # Set legend key background and border color to black
+        axis.title.y=element_text(size=14, color="white"),
+        panel.grid.major = element_line(color= alpha("white", 1)),  # Set major gridlines to black
+        panel.grid.minor = element_line(color=alpha("white", 1)),  # Remove minor gridlines
+        panel.background = element_rect(fill="#23272b"),  # Set background color to grey
+        plot.background = element_rect(fill = "#23272b",color = "#23272b"),  # Set the entire plot background to black
+        text = element_text(family = "Helvetica")
+    )
+  
+})
+```
+
+### Political Affiliation
+
+```{r, cache=FALSE}
+
+renderPlot({
+  df_political_affiliation = Base_data %>%
+  filter(InsuranceType == input$insur_type) %>%
+  mutate(Political_Affiliation = case_when(State %in% Blue_states ~ "Democratic State",
+                            State %in% Red_states ~ "Republican State",
+                            State %in% Not_consistent ~ "Inconsistant State",
+                            TRUE ~ "Not a State")) %>%
+  filter(Political_Affiliation != "Not a State")%>%
+  group_by(Political_Affiliation, Year, InsuranceType)%>% 
+  summarise(average_percent = mean(Percent_Decimal))
+  
+  ggplot(df_political_affiliation, aes(x=Year, y=average_percent, color =Political_Affiliation)) +
+  geom_line()+
+  scale_color_manual(values=c("blue", "white", "red"))+
+  ggtitle(paste(input$insur_type, "Insurance Enrollment By Political Affiliation"))+
+  xlab("Year") +
+  ylab("Percentage") +
+  # scale_y_continuous(trans='log10')+
+  theme(plot.title = element_text(size=16, hjust = 0.5, color="white"),
+        axis.title.x=element_text(size=14, color="white"),
+        axis.text.x = element_text(size = 12, color = "white"),
+        axis.text.y = element_text(size = 12, color = "white"),
+        legend.title=element_text(size=14, color="white", hjust = 0.5),
+        legend.text=element_text(size=12, color="white",),
+        legend.key.size=unit(0.4, units = "cm"),
+        legend.justification = c("right", "top"),
+        legend.background = element_rect(fill = "#23272b"),  # Set legend background to black
+        legend.key = element_rect(fill = "#23272b", color = "#23272b"),  # Set legend key background and border color to black
+        axis.title.y=element_text(size=14, color="white"),
+        panel.grid.major = element_line(color= alpha("white", 1)),  # Set major gridlines to black
+        panel.grid.minor = element_line(color=alpha("white", 1)),  # Remove minor gridlines
+        panel.background = element_rect(fill="#23272b"),  # Set background color to grey
+        plot.background = element_rect(fill = "#23272b",color = "#23272b"),  # Set the entire plot background to black
+        text = element_text(family = "Helvetica")
+    )
+  
+})
+```
+
+

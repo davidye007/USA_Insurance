@@ -24,7 +24,7 @@ selectInput("year", label = "Year:",
             choices = seq(2008, 2022, 1), selected = 2022)
 
 selectInput("insur_type", label = "Insurance:",
-            choices = c("Private", "Employer-based", "Direct-purchase", "TRICARE", "Public", "Medicaid", "Medicare", "VA_Care"), selected = "Employer-based")
+            choices = c("Uninsured", "Private", "Employer-based", "Direct-purchase", "TRICARE", "Public", "Medicaid", "Medicare", "VA_Care"), selected = "Employer-based")
 ```
 
 ```{r setup, include=FALSE}

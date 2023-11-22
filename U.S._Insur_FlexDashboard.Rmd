@@ -186,6 +186,7 @@ renderPlot({
   ggtitle(paste(input$insur_type, "Insurance Enrollment By Political Affiliation"))+
   xlab("Year") +
   ylab("Percentage") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
   expand_limits(y = 0) +  # Set expand argument to force y-axis to start from zero
   # scale_y_continuous(trans='log10')+
   theme(plot.title = element_text(size=18, hjust = 0.5, color="white"),
@@ -230,9 +231,10 @@ renderPlot({
   ggtitle(paste(input$insur_type, "Insurance Enrollment By Political Affiliation"))+
   xlab("Year") +
   ylab("Percentage") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
   expand_limits(y = 0) +  # Set expand argument to force y-axis to start from zero
   # scale_y_continuous(trans='log10')+
-  theme(plot.title = element_text(size=16, hjust = 0.5, color="white"),
+  theme(plot.title = element_text(size=18, hjust = 0.5, color="white"),
         axis.title.x=element_text(size=14, color="white"),
         axis.text.x = element_text(size = 12, color = "white"),
         axis.text.y = element_text(size = 12, color = "white"),

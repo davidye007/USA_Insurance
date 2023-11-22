@@ -139,7 +139,7 @@ renderPlot({
   ggplot(filtered_data, aes(x=Year, y=Percent, color = InsuranceType))+
   geom_line()+
   scale_y_continuous(trans='log10')+
-  scale_colour_brewer(palette = "Set1")+
+  scale_colour_brewer(palette = "Dark2")+
   ggtitle(paste("Insurance Enrollment For", sel_state))+
   xlab("Year")+
   ylab("Number of People (log10 scale)") +
@@ -186,6 +186,7 @@ renderPlot({
   ggtitle(paste(input$insur_type, "Insurance Enrollment By Political Affiliation"))+
   xlab("Year") +
   ylab("Percentage") +
+  expand_limits(y = 0) +  # Set expand argument to force y-axis to start from zero
   # scale_y_continuous(trans='log10')+
   theme(plot.title = element_text(size=18, hjust = 0.5, color="white"),
         axis.title.x=element_text(size=14, color="white"),
@@ -229,6 +230,7 @@ renderPlot({
   ggtitle(paste(input$insur_type, "Insurance Enrollment By Political Affiliation"))+
   xlab("Year") +
   ylab("Percentage") +
+  expand_limits(y = 0) +  # Set expand argument to force y-axis to start from zero
   # scale_y_continuous(trans='log10')+
   theme(plot.title = element_text(size=16, hjust = 0.5, color="white"),
         axis.title.x=element_text(size=14, color="white"),

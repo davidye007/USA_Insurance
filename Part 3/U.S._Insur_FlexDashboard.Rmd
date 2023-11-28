@@ -4,7 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     theme:
       version: 4
-      bootswatch: slate
+      bootswatch: lux
     orientation: rows
     social: menu
 runtime: shiny
@@ -12,7 +12,7 @@ runtime: shiny
 
 
 
-# Questions to Explore: {.sidebar}
+Questions to Explore: {.sidebar}
 -------------------------------------
 
 1. How does heath insurance enrollment vary by state?
@@ -51,7 +51,7 @@ data(uscountygeojson)
 
 thm <- 
   hc_theme(
-    colors = c("#1a6ecc", "white", "#90ed7d"),
+    colors = c("#1a6ecc", "black", "#90ed7d"),
     chart = list(
       backgroundColor = "transparent",
       style = list(fontFamily = "Helvetica")
@@ -108,7 +108,7 @@ renderHighchart({
     hc_add_series_map(usgeojson, Base_Data_filtered, name = "Percent of State: ", value = "Percentage", joinBy = c("woename", "State")) %>%
     hc_mapNavigation(enabled = TRUE) %>%
     hc_add_theme(thm) %>%
-    hc_title(text = paste(input$insur_type, "Insurance in ", input$year), style = list(color = "white")) %>%
+    hc_title(text = paste(input$insur_type, "Insurance in ", input$year), style = list(color = "black")) %>%
     hc_plotOptions(
       series = list(
         events = list(
@@ -143,21 +143,21 @@ renderPlot({
   ggtitle(paste("Insurance Enrollment For", sel_state))+
   xlab("Year")+
   ylab("Number of People (log10 scale)") +
-  theme(plot.title = element_text(size=18, hjust = 0.5, color="white"),
-        axis.title.x=element_text(size=14, color="white"),
-        axis.text.x = element_text(size = 12, color = "white"),
-        axis.text.y = element_text(size = 12, color = "white"),
-        legend.title=element_text(size=14, color="white", hjust = 0.5),
-        legend.text=element_text(size=12, color="white",),
+  theme(plot.title = element_text(size=18, hjust = 0.5, color="black"),
+        axis.title.x=element_text(size=14, color="black"),
+        axis.text.x = element_text(size = 12, color = "black"),
+        axis.text.y = element_text(size = 12, color = "black"),
+        legend.title=element_text(size=14, color="black", hjust = 0.5),
+        legend.text=element_text(size=12, color="black",),
         legend.key.size=unit(0.4, units = "cm"),
         legend.justification = c("right", "top"),
-        legend.background = element_rect(fill = "#23272b"),  # Set legend background to black
-        legend.key = element_rect(fill = "#23272b", color = "#23272b"),  # Set legend key background and border color to black
-        axis.title.y=element_text(size=14, color="white"),
-        panel.grid.major = element_line(color= alpha("white", 1)),  # Set major gridlines to black
-        panel.grid.minor = element_line(color=alpha("white", 1)),  # Remove minor gridlines
-        panel.background = element_rect(fill="#23272b"),  # Set background color to grey
-        plot.background = element_rect(fill = "#23272b",color = "#23272b"),  # Set the entire plot background to black
+        legend.background = element_rect(fill = "white"),  # Set legend background to black
+        legend.key = element_rect(fill = "white", color = "white"),  # Set legend key background and border color to black
+        axis.title.y=element_text(size=14, color="black"),
+        panel.grid.major = element_line(color= alpha("black", 1)),  # Set major gridlines to black
+        panel.grid.minor = element_line(color=alpha("black", 1)),  # Remove minor gridlines
+        panel.background = element_rect(fill="white"),  # Set background color to grey
+        plot.background = element_rect(fill = "white",color = "white"),  # Set the entire plot background to black
         text = element_text(family = "Helvetica")
     )
 })
@@ -182,28 +182,28 @@ renderPlot({
   
   ggplot(df_political_affiliation, aes(x=Year, y=average_percent, color =Political_Affiliation)) +
   geom_line()+
-  scale_color_manual(values=c("blue", "white", "red"))+
+  scale_color_manual(values=c("blue", "black", "red"))+
   ggtitle(paste(input$insur_type, "Insurance Enrollment By Political Affiliation"))+
   xlab("Year") +
   ylab("Percentage") +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
   expand_limits(y = 0) +  # Set expand argument to force y-axis to start from zero
   # scale_y_continuous(trans='log10')+
-  theme(plot.title = element_text(size=18, hjust = 0.5, color="white"),
-        axis.title.x=element_text(size=14, color="white"),
-        axis.text.x = element_text(size = 12, color = "white"),
-        axis.text.y = element_text(size = 12, color = "white"),
-        legend.title=element_text(size=14, color="white", hjust = 0.5),
-        legend.text=element_text(size=12, color="white",),
+  theme(plot.title = element_text(size=18, hjust = 0.5, color="black"),
+        axis.title.x=element_text(size=14, color="black"),
+        axis.text.x = element_text(size = 12, color = "black"),
+        axis.text.y = element_text(size = 12, color = "black"),
+        legend.title=element_text(size=14, color="black", hjust = 0.5),
+        legend.text=element_text(size=12, color="black",),
         legend.key.size=unit(0.4, units = "cm"),
         legend.justification = c("right", "top"),
-        legend.background = element_rect(fill = "#23272b"),  # Set legend background to black
-        legend.key = element_rect(fill = "#23272b", color = "#23272b"),  # Set legend key background and border color to black
-        axis.title.y=element_text(size=14, color="white"),
-        panel.grid.major = element_line(color= alpha("white", 1)),  # Set major gridlines to black
-        panel.grid.minor = element_line(color=alpha("white", 1)),  # Remove minor gridlines
-        panel.background = element_rect(fill="#23272b"),  # Set background color to grey
-        plot.background = element_rect(fill = "#23272b",color = "#23272b"),  # Set the entire plot background to black
+        legend.background = element_rect(fill = "white"),  # Set legend background to black
+        legend.key = element_rect(fill = "white", color = "white"),  # Set legend key background and border color to black
+        axis.title.y=element_text(size=14, color="black"),
+        panel.grid.major = element_line(color= alpha("black", 1)),  # Set major gridlines to black
+        panel.grid.minor = element_line(color=alpha("black", 1)),  # Remove minor gridlines
+        panel.background = element_rect(fill="white"),  # Set background color to grey
+        plot.background = element_rect(fill = "white",color = "white"),  # Set the entire plot background to black
         text = element_text(family = "Helvetica")
     )
   
@@ -227,28 +227,28 @@ renderPlot({
   
   ggplot(df_political_affiliation, aes(x=Year, y=average_percent, color =Political_Affiliation)) +
   geom_line()+
-  scale_color_manual(values=c("blue", "white", "red"))+
+  scale_color_manual(values=c("blue", "black", "red"))+
   ggtitle(paste(input$insur_type, "Insurance Enrollment By Political Affiliation"))+
   xlab("Year") +
   ylab("Percentage") +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
   expand_limits(y = 0) +  # Set expand argument to force y-axis to start from zero
   # scale_y_continuous(trans='log10')+
-  theme(plot.title = element_text(size=18, hjust = 0.5, color="white"),
-        axis.title.x=element_text(size=14, color="white"),
-        axis.text.x = element_text(size = 12, color = "white"),
-        axis.text.y = element_text(size = 12, color = "white"),
-        legend.title=element_text(size=14, color="white", hjust = 0.5),
-        legend.text=element_text(size=12, color="white",),
+  theme(plot.title = element_text(size=18, hjust = 0.5, color="black"),
+        axis.title.x=element_text(size=14, color="black"),
+        axis.text.x = element_text(size = 12, color = "black"),
+        axis.text.y = element_text(size = 12, color = "black"),
+        legend.title=element_text(size=14, color="black", hjust = 0.5),
+        legend.text=element_text(size=12, color="black",),
         legend.key.size=unit(0.4, units = "cm"),
         legend.justification = c("right", "top"),
-        legend.background = element_rect(fill = "#23272b"),  # Set legend background to black
-        legend.key = element_rect(fill = "#23272b", color = "#23272b"),  # Set legend key background and border color to black
-        axis.title.y=element_text(size=14, color="white"),
-        panel.grid.major = element_line(color= alpha("white", 1)),  # Set major gridlines to black
-        panel.grid.minor = element_line(color=alpha("white", 1)),  # Remove minor gridlines
-        panel.background = element_rect(fill="#23272b"),  # Set background color to grey
-        plot.background = element_rect(fill = "#23272b",color = "#23272b"),  # Set the entire plot background to black
+        legend.background = element_rect(fill = "white"),  # Set legend background to black
+        legend.key = element_rect(fill = "white", color = "white"),  # Set legend key background and border color to black
+        axis.title.y=element_text(size=14, color="black"),
+        panel.grid.major = element_line(color= alpha("black", 1)),  # Set major gridlines to black
+        panel.grid.minor = element_line(color=alpha("black", 1)),  # Remove minor gridlines
+        panel.background = element_rect(fill="white"),  # Set background color to grey
+        plot.background = element_rect(fill = "white",color = "white"),  # Set the entire plot background to black
         text = element_text(family = "Helvetica")
     )
   

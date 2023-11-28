@@ -48,7 +48,6 @@ knitr::opts_chunk$set(cache = TRUE)
 
 data(uscountygeojson)
 
-
 thm <- 
   hc_theme(
     colors = c("#1a6ecc", "black", "#90ed7d"),

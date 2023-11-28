@@ -99,7 +99,6 @@ Row
 
 ```{r, cache=FALSE}
 renderHighchart({
-  
   selectedState <- reactiveVal("Washington")  # Reactive value to store the selected state
   ### Will make plot dynamic eventually
   Base_Data_filtered <- Base_data %>% filter(InsuranceType == input$insur_type, Year == input$year, State != "United States")

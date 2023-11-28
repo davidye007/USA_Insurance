@@ -20,7 +20,6 @@ Base_data = Data %>%
   filter(InsuranceType != "Total") %>%
   filter(InsuranceType != "Any Coverage") %>%
   mutate(Percent = ifelse(is.na(Percentage), 0, Percentage)) %>%
-  mutate(Percent_Decimal = Percent * 0.01) %>%
   mutate(Population_expanded = Population * 1000)
   
   
@@ -29,23 +28,32 @@ Base_data = Data %>%
 Blue_states = c("Washington", "Oregon", "California", "Minnesota", "Illinois", "New York", "Vermont", "Maine", "Massachussetts", "Rhode Island", "Conneticut", "New Jersey", "Delaware", "Maryland", "District of Columbia", "Hawaii")
 Red_states = c("Idaho", "Montana", "Wyoming", "Utah", "North Dakota", "South Dakota", "Nebraska", "Kansas", "Oklahoma", "Texas", "Missouri", "Arkansas", "Louisiana", "Mississippi", "Alabama", "South Carolina", "Tennessee", "Kentucky", "West Virginia", "Alaska")
 Not_consistent = c("Nevada", "Arizona", "Colorado", "New Mexico", "Iowa", "Wisconsin", "Michigan", "Indiana", "Ohio", "Pennsylvania", "New Hampshire", "Virginia", "North Carolina", "Georgia", "Florida")
+
+#Classifying by Minimum Wage Status: https://www.ncsl.org/labor-and-employment/state-minimum-wages
+federal_minimum_wage = c("Alabama","Georgia", "Idaho", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Mississippi", "New Hampshire", "North Carolina", "North Dakota", "Oklahoma", "Pennsylvania", "South Carolina", "Tennessee", "Texas", "Utah", "Wisconsin", "Wyoming")
+non_indexed = c("Arkansas", "Delaware", "Hawaii", "Illinois", "Maryland", "Massachusetts", "New Mexico", "New York", "Rhode Island", "West Virginia")
+national = c("United States")
 ```
-
-
-
-
-
 
 ```{r data_cleaning}
 df_political_affiliation = Base_data %>%
   filter(InsuranceType == "Medicare") %>%
-  mutate(Political_Affiliation = case_when(State %in% Blue_states ~ "Democratic State",
-                            State %in% Red_states ~ "Republican State",
-                            State %in% Not_consistent ~ "Did Not Vote Consistantly Democratic or Republican",
+  mutate(Political_Affiliation = case_when(State %in% Blue_states ~ "Democratic \n State",
+                            State %in% Red_states ~ "Republican \n State",
+                            State %in% Not_consistent ~ "Did Not Vote \n Consistantly \n Democratic \n or Republican",
                             TRUE ~ "Not a State")) %>%
   filter(Political_Affiliation != "Not a State")%>%
   group_by(Political_Affiliation, Year, InsuranceType)%>% 
-  summarise(average_percent = mean(Percent_Decimal))                          
+  summarise(average_percent = mean(Percent))   
+
+df_Minimum_Wage = Base_data %>%
+  filter(InsuranceType == "Medicare") %>%
+  mutate(Minimum_Wage = case_when(State %in% non_indexed ~ "Above Federal \n Minimum Wage",
+                            State %in% federal_minimum_wage ~ "At or Below \n Federal \n Minimum Wage",
+                            TRUE ~ "Indexed \n Minimum Wage")) %>%
+  filter(State != "United States")%>%
+  group_by(Minimum_Wage, Year, InsuranceType)%>% 
+  summarise(average_percent = mean(Percent))  
 
 df_washington = Base_data  %>%
   filter(State == "Washington")
@@ -56,23 +64,24 @@ df_washington = Base_data  %>%
 ### Add a check on/off for each state to pick and choose on a line graph?
 ggplot(df_political_affiliation, aes(x=Year, y=average_percent, color =Political_Affiliation)) +
 geom_line()+
-scale_color_manual(values=c("blue", "grey1", "red"))+
-ggtitle("Medicare Insurance Enrollment By Political Affiliation", subtitle = "*Part 2: Using Shinny We Can Toggle Through Different Insurance Types*")+
+scale_color_manual(values=c("blue", "grey1", "red"), name="Political Affiliation")+
+ggtitle("Medicare Insurance Enrollment By Political Affiliation", subtitle = "*Part 2: Using Shinny We Can Toggle Through 
+        Different Insurance Types*")+
 xlab("Year") +
 ylab("Percentage") +
-# scale_y_continuous(trans='log10')+
+scale_y_continuous(expand=c(0, 0), limits = c(0, 1))+
 theme(plot.title = element_text(size=12, hjust = 0.5, color="grey25"),
       axis.title.x=element_text(size=10, color="gray25"),
-      axis.text.x=element_text(angle = 40),
-      legend.title=element_text(size=8, color="grey25", hjust = 0.5),
+      legend.title=element_text(size=10, color="grey25", hjust = 0.5),
       legend.text=element_text(size=8, color="grey25",),
-      legend.key.size=unit(0.4, units = "cm"),
+      legend.key.height=unit(1, units = "cm"),
+      legend.key.width=unit(0.2, units = "cm"),
       legend.justification = c("right", "top"),
       axis.title.y=element_text(size=10, color="gray25", ),
       aspect.ratio=0.9,
       panel.grid.major=element_blank(),
       panel.grid.minor=element_blank()) 
-ggsave("Graph(1).png", device="png")
+ggsave("Figures/Graph(1).png", device="png")
 
 ```
 
@@ -87,7 +96,6 @@ xlab("Year")+
 ylab("Number of People (log10 scale)") +
 theme(plot.title = element_text(size=12, hjust = 0.5, color="grey25"),
       axis.title.x=element_text(size=10, color="gray25"),
-      axis.text.x=element_text(angle = 40),
       legend.title=element_text(size=8, color="grey25", hjust = 0.5),
       legend.text=element_text(size=8, color="grey25",),
       legend.key.size=unit(0.4, units = "cm"),
@@ -96,5 +104,32 @@ theme(plot.title = element_text(size=12, hjust = 0.5, color="grey25"),
       aspect.ratio=0.9,
       panel.grid.major=element_blank(),
       panel.grid.minor=element_blank()) 
-ggsave("Graph(2).png", device="png")
+ggsave("Figures/Graph(2).png", device="png")
+```
+
+```{r Minimum_Wage_Plot}
+### When we have a shiny dash board we can toggle from Blue -> Red -> Neither
+### Add a check on/off for each state to pick and choose on a line graph?
+ggplot(df_Minimum_Wage, aes(x=Year, y=average_percent, color = Minimum_Wage)) +
+geom_line()+
+scale_color_discrete(name="Minimum Wage")+
+ggtitle("Medicare Insurance Enrollment By Minimum Wage Type", subtitle = "*Using Our Interactive Dashboard We Can 
+        Toggle Through Different Insurance Types*")+
+xlab("Year") +
+ylab("Average Percentage Of People With 
+     This Insuarance Type Per State") +
+scale_y_continuous(expand=c(0, 0), limits = c(0, 1))+
+theme(plot.title = element_text(size=12, hjust = 0.5, color="grey25"),
+      axis.title.x=element_text(size=10, color="gray25"),
+      legend.title=element_text(size=8, color="grey25", hjust = 0.5),
+      legend.text=element_text(size=8, color="grey25",),
+      legend.key.height=unit(1, units = "cm"),
+      legend.key.width=unit(0.4, units = "cm"),
+      legend.justification = c("right", "top"),
+      axis.title.y=element_text(size=10, color="gray25"),
+      aspect.ratio=0.9,
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank())
+ggsave("Figures/Graph(4).png", device="png")
+
 ```

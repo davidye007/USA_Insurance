@@ -91,6 +91,8 @@ renderHighchart({
   ### Will make plot dynamic eventually
   Base_Data_filtered <- Base_data %>% filter(InsuranceType == input$insur_type, Year == input$year, State != "United States")
   
+  Base_Data_border<- Base_data %>% filter(InsuranceType == input$insur_type, Year == input$year, State == ifelse(is.null(input$selected_state), "Washington", input$selected_state))
+  
   min_value <- min(Base_Data_filtered$Percentage)  # Calculate the minimum value
   
   
@@ -112,15 +114,29 @@ renderHighchart({
       labels = list(
         format = "{value}%"
       )
+    )%>%
+    hc_mapNavigation(
+      zoomIn = list(
+        enabled = TRUE
+      ),
+      zoomOut = list(
+        enabled = TRUE
+      )
     )
 })
+
 ```
 
 ### Line Plot of Insurance Type
 
 ```{r}
+data = list(
+  list(usgeojson$woename == "California")  # Specify California to add a red border
+)
+
 observe({
-  print(input$selected_state)  # This will print the selected year in the R console
+  print(input$selectedState)  # This will print the selected year in the R console
+  print(data)
 })
 
 ```

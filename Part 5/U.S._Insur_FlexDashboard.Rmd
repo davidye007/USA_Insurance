@@ -66,9 +66,9 @@ Explore States
 Questions to Explore: {.sidebar}
 -------------------------------------
 
-1. How does heath insurance enrollment vary by state?
+1. How does heath insurance enrollment vary across the United States?
 
-2. Does heath insurance enrollment rate and main insurance type change based on a state's political affiliation?
+2. How did the enrollment rate for different types of insurance change over time in each state?
 
 ```{r}
 selectInput("year", label = "Year:",
@@ -90,8 +90,6 @@ renderHighchart({
   selectedState <- reactiveVal("Washington")  # Reactive value to store the selected state
   ### Will make plot dynamic eventually
   Base_Data_filtered <- Base_data %>% filter(InsuranceType == input$insur_type, Year == input$year, State != "United States")
-  
-  Base_Data_border<- Base_data %>% filter(InsuranceType == input$insur_type, Year == input$year, State == ifelse(is.null(input$selected_state), "Washington", input$selected_state))
   
   min_value <- min(Base_Data_filtered$Percentage)  # Calculate the minimum value
   
@@ -124,19 +122,13 @@ renderHighchart({
       )
     )
 })
-
 ```
 
 ### Line Plot of Insurance Type
 
 ```{r}
-data = list(
-  list(usgeojson$woename == "California")  # Specify California to add a red border
-)
-
 observe({
-  print(input$selectedState)  # This will print the selected year in the R console
-  print(data)
+  print(input$selected_state)  # This will print the selected year in the R console
 })
 
 ```

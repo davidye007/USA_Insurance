@@ -72,11 +72,11 @@ Questions to Explore: {.sidebar}
 
 ```{r}
 selectInput("year", label = "Year:",
-            choices = seq(2008, 2022, 1)[-which(seq(2008, 2022, 1) == 2020)], 
+            choices = rev(seq(2008, 2022, 1)[-which(seq(2008, 2022, 1) == 2020)]), 
             selected = 2022)
 
 selectInput("insur_type", label = "Insurance:",
-            choices = c("Uninsured", "Private", "Employer-based", "Direct-purchase", "TRICARE", "Public", "Medicaid", "Medicare", "VA_Care"), selected = "Employer-based")
+            choices = c("Direct-purchase", "Employer-based", "Medicaid", "Medicare", "Private", "Public", "TRICARE", "Uninsured", "VA_Care"), selected = "Direct-purchase")
 ```
 
 Row

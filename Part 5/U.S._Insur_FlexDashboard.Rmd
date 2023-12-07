@@ -136,7 +136,7 @@ observe({
 
 
 ```{r, cache=FALSE}
-custom_palette <- brewer.pal(9, "Dark2")
+custom_palette <- c("#0041C2", "#3BB143", "#E31A1C", "#FF7F00", "#6A3D9A", "#964B00", "#ccac00", "#FF0090", "#12086F")
 renderPlot({
   filtered_data <- Base_data %>% 
     filter(State == ifelse(is.null(input$selected_state), "Washington", input$selected_state))
@@ -144,11 +144,12 @@ renderPlot({
   sel_state <- ifelse(is.null(input$selected_state), "Washington", input$selected_state)
   
   ggplot(filtered_data, aes(x=Year, y=Percent, color = reorder(InsuranceType, desc(Percent))))+
-  geom_line(size = 0.9)+
+  geom_line(size = 1)+
     scale_y_continuous(trans='log10', labels = function(x) paste0(x, "%")) +  # Modify this line to add 'r' to each tick mark on the y-axis
   #scale_y_continuous(trans='log10')+
-  #scale_colour_brewer(palette = "Dark2")+
-  scale_fill_manual(values = custom_palette)+
+  #scale_colour_brewer(palette = "Paired")+
+  #scale_fill_manual(values = custom_palette)+
+  scale_colour_manual(values = custom_palette) +
   ggtitle(paste("Insurance Enrollment For", sel_state))+
   xlab("Year")+
   ylab("Percentage of State (log10 scale)") +
@@ -209,7 +210,7 @@ renderPlot({
   summarise(average_percent = mean(Percent_Decimal))
   
   ggplot(df_political_affiliation, aes(x=Year, y=average_percent, color =Political_Affiliation)) +
-  geom_line(size = 0.9)+
+  geom_line(size = 1)+
   scale_color_manual(values=c("blue", "black", "red"))+
   labs(color='Political Affilitation') +
   ggtitle(paste(input$insur_type_2, "Insurance Enrollment"))+
@@ -254,7 +255,7 @@ renderPlot({
   summarise(average_percent = mean(Percent_Decimal))  
   
   ggplot(df_Minimum_Wage, aes(x=Year, y=average_percent, color = Minimum_Wage)) +
-  geom_line(size = 0.9)+
+  geom_line(size = 1)+
   scale_color_manual(values=c("green", "red", "blue"))+
   labs(color='Minimum Wage') +
   ggtitle(paste(input$insur_type_2, "Insurance Enrollment"))+

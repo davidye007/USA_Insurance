@@ -124,7 +124,7 @@ renderHighchart({
 })
 ```
 
-### Line Plot of Insurance Type
+### Time-Series Plot of Insurance Type (click on the map to change states)
 
 ```{r}
 observe({
@@ -188,7 +188,7 @@ selectInput("insur_type_2", label = "Insurance:",
 
 Row {data-height=1000}
 -------------------------------------
-### Line Plot By A State's Political Affiliation
+### Time-Series Plot By A State's Political Affiliation
 
 ```{r, cache=FALSE}
 
@@ -234,7 +234,7 @@ renderPlot({
 })
 ```
 
-### Line Plot By A State's Minimum Wage Type
+### Time-Series Plot By A State's Minimum Wage Type
 
 ```{r, cache=FALSE}
 

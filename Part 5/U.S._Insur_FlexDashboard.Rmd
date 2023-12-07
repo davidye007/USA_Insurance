@@ -135,6 +135,7 @@ observe({
 
 
 ```{r, cache=FALSE}
+custom_palette <- brewer.pal(9, "Dark2")
 renderPlot({
   filtered_data <- Base_data %>% 
     filter(State == ifelse(is.null(input$selected_state), "Washington", input$selected_state))
@@ -145,22 +146,23 @@ renderPlot({
   geom_line(size = 0.9)+
     scale_y_continuous(trans='log10', labels = function(x) paste0(x, "%")) +  # Modify this line to add 'r' to each tick mark on the y-axis
   #scale_y_continuous(trans='log10')+
-  scale_colour_brewer(palette = "Dark2")+
+  #scale_colour_brewer(palette = "Dark2")+
+  scale_fill_manual(values = custom_palette)+
   ggtitle(paste("Insurance Enrollment For", sel_state))+
   xlab("Year")+
   ylab("Percentage of State (log10 scale)") +
   labs(color='Insurance Type') +
-  theme(plot.title = element_text(size=18, hjust = 0.5, color="black"),
-        axis.title.x=element_text(size=14, color="black"),
-        axis.text.x = element_text(size = 12, color = "black"),
-        axis.text.y = element_text(size = 12, color = "black"),
-        legend.title=element_text(size=14, color="black", hjust = 0.5),
-        legend.text=element_text(size=12, color="black",),
+  theme(plot.title = element_text(size=22, hjust = 0.5, color="black"),
+        axis.title.x=element_text(size=16, color="black"),
+        axis.text.x = element_text(size = 14, color = "black"),
+        axis.text.y = element_text(size = 14, color = "black"),
+        legend.title=element_text(size=18, color="black", hjust = 0.5),
+        legend.text=element_text(size=16, color="black",),
         legend.key.size=unit(0.4, units = "cm"),
         legend.justification = c("right", "top"),
         legend.background = element_rect(fill = "white"),  # Set legend background to black
         legend.key = element_rect(fill = "white", color = "white"),  # Set legend key background and border color to black
-        axis.title.y=element_text(size=14, color="black"),
+        axis.title.y=element_text(size=16, color="black"),
         panel.grid.major = element_line(color= alpha("black", 1)),  # Set major gridlines to black
         panel.grid.minor = element_line(color=alpha("black", 1)),  # Remove minor gridlines
         panel.background = element_rect(fill="white"),  # Set background color to grey

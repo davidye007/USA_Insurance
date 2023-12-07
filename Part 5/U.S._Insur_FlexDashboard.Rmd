@@ -185,8 +185,10 @@ SPACE
 4. Does heath insurance enrollment rate and main insurance type change based on a state's Minimum Wage Status?
 
 ```{r}
+
+
 selectInput("insur_type_2", label = "Insurance:",
-            choices = c("Uninsured", "Private", "Employer-based", "Direct-purchase", "TRICARE", "Public", "Medicaid", "Medicare", "VA_Care"), selected = "Employer-based")
+            choices = c("Direct-purchase", "Employer-based", "Medicaid", "Medicare", "Private", "Public", "TRICARE", "Uninsured", "VA_Care"), selected = "Direct-purchase")
 ```
 
 Row {data-height=1000}

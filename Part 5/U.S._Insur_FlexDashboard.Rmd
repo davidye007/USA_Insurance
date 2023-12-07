@@ -76,7 +76,7 @@ selectInput("year", label = "Year:",
             selected = 2022)
 
 selectInput("insur_type", label = "Insurance:",
-            choices = c("Direct-purchase", "Employer-based", "Medicaid", "Medicare", "Private", "Public", "TRICARE", "Uninsured", "VA_Care"), selected = "Direct-purchase")
+            choices = c("Direct-purchase", "Employer-based", "Medicaid", "Medicare", "Private", "Public", "TRICARE", "Uninsured", "VA Care"), selected = "Direct-purchase")
 ```
 
 Row
@@ -136,7 +136,7 @@ observe({
 
 
 ```{r, cache=FALSE}
-custom_palette <- c("#0041C2", "#3BB143", "#E31A1C", "#FF7F00", "#6A3D9A", "#964B00", "#ccac00", "#FF0090", "#12086F")
+custom_palette <- c("#0041C2", "#3BB143", "#E31A1C", "#6A3D9A", "#FF7F00", "#964B00", "#ccac00", "#FF0090", "#12086F")
 renderPlot({
   filtered_data <- Base_data %>% 
     filter(State == ifelse(is.null(input$selected_state), "Washington", input$selected_state))
